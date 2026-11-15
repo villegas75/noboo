@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>noboo</title>
+<style>
+:root{--bg:#000;--card:#0a0a0a;--tx:#fafafa;--mu:#a3a3a3;--ac:#fafafa;--ac2:#161616;--bd:#262626;--on:#000;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#000;--tx:#fafafa;--mu:#8a8a8a;--ac:#fafafa;--ac2:#161616;--bd:#262626;--on:#000;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#000;--card:#000;--tx:#fafafa;--mu:#8a8a8a;--ac:#fafafa;--ac2:#161616;--bd:#262626;--on:#000;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:500}
+main{max-width:520px;margin:0 auto;padding:16px 16px 90px}
+h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:8px 0 16px}h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--mu);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button{font:inherit;border:0;border-radius:6px;padding:13px 14px;background:var(--ac);color:var(--on);font-weight:700;letter-spacing:.02em;width:100%;margin-top:10px}
+button.s{background:none;color:var(--tx);border:1px solid var(--tx)}button:disabled{opacity:.5}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.bar{height:2px;border-radius:0;background:var(--bd);overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:var(--ac)}
+.mu{color:var(--mu);font-size:13px}.big{font-size:48px;font-weight:700;letter-spacing:-.03em}
+.meal{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--bd)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav[hidden]{display:none}nav button{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;background:none;color:var(--mu);margin:0;border-radius:0;padding:10px 2px 12px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}nav button.on{color:var(--tx)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;justify-content:flex-start;padding:16px 20px 8px;background:var(--bg)}header svg{width:30px;height:30px}header b{font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1}body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.day{padding:0;overflow:hidden}.dh{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--ac2)}.dn{width:30px;height:30px;border-radius:50%;background:var(--ac);color:var(--on);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}.ex{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-top:1px solid var(--bd)}.chip{background:none;border:1px solid var(--tx);color:var(--tx);font-weight:600;border-radius:4px;padding:4px 8px;font-size:13px;white-space:nowrap}.msg{padding:10px 12px;border-radius:12px;margin:8px 0;white-space:pre-wrap;background:var(--ac2)}.msg.u{background:var(--bg);border:1px solid var(--bd);margin-left:24px}.rec{white-space:pre-wrap;background:var(--ac2);border-radius:10px;padding:12px;margin-top:10px}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script></head><body><header><b>noboo</b></header><main id="app"></main>
+<nav id="nav" hidden><button data-t="hoy"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Hoy</button><button data-t="rut"><svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Rutina</button><button data-t="coach"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Coach</button><button data-t="prog"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 15l4-4 4 3 6-8"/></svg>Progreso</button><button data-t="perfil"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</button></nav>
+<script>
+const $=s=>document.querySelector(s);
+let S={profile:null,meals:[],weights:[],routine:null,chat:[]},tab="hoy",busy=false,rec="";
+try{const r=localStorage.getItem("fc");if(r)S=JSON.parse(r)}catch(e){}
+S=Object.assign({routine:null,chat:[],photos:[],meals:[],weights:[]},S);let cmpTxt="";
+const save=()=>{try{localStorage.setItem("fc",JSON.stringify(S))}catch(e){}cloud()};
+const today=()=>new Date().toISOString().slice(0,10);
+function targets(p){
+ const bmr=10*p.w+6.25*p.h-5*p.a+(p.sex==="m"?5:-161);
+ let k=bmr*p.act+({lose:-400,keep:0,gain:300}[p.goal]);k=Math.round(k/10)*10;
+ const pr=Math.round(p.w*(p.goal==="gain"?2:1.8)),f=Math.round(k*.25/9);
+ return{k,p:pr,f,c:Math.max(0,Math.round((k-pr*4-f*9)/4))};
+}
+function totals(d){return S.meals.filter(m=>m.d===d).reduce((a,m)=>({k:a.k+m.k,p:a.p+m.p,c:a.c+m.c,f:a.f+m.f}),{k:0,p:0,c:0,f:0})}
+function bar(l,v,t,u){const pc=Math.min(100,t?v/t*100:0);return`<div class="row" style="justify-content:space-between"><span>${l}</span><span class="mu" style="text-align:right">${Math.round(v)} / ${t} ${u}</span></div><div class="bar"><i style="width:${pc}%"></i></div>`}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function onboarding(p){p=p||{};return`${p.a?'<h1>Perfil</h1>':'<h1>Bienvenido</h1><div class="mu" style="margin:-6px 0 16px">Cuéntanos sobre ti para calcular tu plan. Solo te lo pedimos una vez.</div>'}<div class="card">
+<label>Sexo</label><select id="sex"><option value="m">Hombre</option><option value="f" ${p.sex==="f"?"selected":""}>Mujer</option></select>
+<div class="row"><div><label>Edad</label><input id="a" type="number" inputmode="numeric" value="${p.a||""}"></div>
+<div><label>Altura (cm)</label><input id="h" type="number" inputmode="numeric" value="${p.h||""}"></div>
+<div><label>Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="${p.w||""}"></div></div>
+<label>Objetivo</label><select id="goal"><option value="lose">Perder grasa</option><option value="keep" ${p.goal==="keep"?"selected":""}>Mantener</option><option value="gain" ${p.goal==="gain"?"selected":""}>Ganar músculo</option></select>
+<label>Actividad</label><select id="act"><option value="1.2">Sedentario</option><option value="1.375" ${p.act==1.375?"selected":""}>Entreno 1–3 días/semana</option><option value="1.55" ${p.act==1.55?"selected":""}>Entreno 3–5 días/semana</option><option value="1.725" ${p.act==1.725?"selected":""}>Entreno 6–7 días/semana</option></select>
+<label>Alergias o dieta (opcional)</label><input id="diet" value="${esc(p.diet||"")}" placeholder="vegetariano, sin lactosa…">
+<button id="go">${p.a?"Guardar cambios":"Empezar"}</button></div>${p.a?backupCard():""}`}
+
+function hoy(){const p=S.profile,t=targets(p),d=totals(today());
+ const ms=S.meals.filter(m=>m.d===today());
+ return`<h1>Hoy</h1><div class="card"><div class="mu">Calorías restantes</div><div class="big">${Math.max(0,t.k-Math.round(d.k))} kcal</div>
+ ${bar("Proteína",d.p,t.p,"g")}${bar("Carbohidratos",d.c,t.c,"g")}${bar("Grasas",d.f,t.f,"g")}</div>
+ <div class="card"><h2>Añadir comida</h2>
+ <input id="photo" type="file" accept="image/*" capture="environment">
+ <label>Descripción (opcional)</label><input id="txt" placeholder="ej. pollo con arroz, 200 g">
+ <button id="add" ${busy?"disabled":""}>${busy?"Analizando…":"Analizar y guardar"}</button></div>
+ <div class="card"><h2>¿Qué como ahora?</h2><div class="mu">Recomendación según lo que te queda hoy.</div>
+ <button class="s" id="rec" ${busy?"disabled":""}>Recomiéndame</button>${rec?`<div class="rec">${esc(rec)}</div>`:""}</div>
+ <div class="card"><h2>Comidas de hoy</h2>${ms.length?ms.map(m=>`<div class="meal"><span>${esc(m.n)}<div class="mu">P ${m.p} · C ${m.c} · G ${m.f}</div></span><b>${m.k}</b></div>`).join(""):'<div class="mu">Todavía nada.</div>'}</div>`}
+
+function prog(){const w=S.weights;let svg="";
+ if(w.length>1){const v=w.map(x=>x.v),mn=Math.min(...v)-1,mx=Math.max(...v)+1,W=320,H=120;
+  const pts=w.map((x,i)=>`${(i/(w.length-1))*W},${H-((x.v-mn)/(mx-mn))*H}`).join(" ");
+  svg=`<svg viewBox="-6 -6 332 132" width="100%"><polyline fill="none" stroke="var(--ac)" stroke-width="3" points="${pts}"/></svg>`}
+ const days=[...new Set(S.meals.map(m=>m.d))].sort().reverse().slice(0,7);
+ return`<h1>Progreso</h1><div class="card"><h2>Peso</h2>${svg||'<div class="mu">Añade al menos 2 pesajes para ver la gráfica.</div>'}
+ <div class="row"><input id="nw" type="number" inputmode="decimal" placeholder="kg"><button id="aw" style="margin:0">Guardar</button></div>
+ ${w.length?`<div class="mu" style="margin-top:8px">Último: ${w[w.length-1].v} kg (${w[w.length-1].d})</div>`:""}</div>
+ ${photoCard()}<div class="card"><h2>Últimos días</h2>${days.length?days.map(d=>`<div class="meal"><span>${d}</span><b>${Math.round(totals(d).k)} kcal</b></div>`).join(""):'<div class="mu">Sin datos.</div>'}</div>`}
+
+function render(){const a=$("#app");if(gate){a.innerHTML=gateView();bindGate();$("#nav").hidden=true;return}$("#nav").hidden=!S.profile||tab==="wk";
+ if(!S.profile){a.innerHTML=wizView();bindWiz()}
+ else if(tab==="perfil"){a.innerHTML=onboarding(S.profile);bindBackup();$("#go").onclick=()=>{
+  const p={sex:$("#sex").value,a:+$("#a").value,h:+$("#h").value,w:+$("#w").value,goal:$("#goal").value,act:+$("#act").value,diet:$("#diet").value};
+  if(!(p.a>=14&&p.a<=100)||!(p.h>=120&&p.h<=230)||!(p.w>=30&&p.w<=300)){alert("Revisa tu edad, altura (cm) y peso (kg)");return}
+  S.profile=p;if(!S.weights.length)S.weights.push({d:today(),v:p.w});save();tab="hoy";render()}}
+ else if(tab==="hoy"){a.innerHTML=hoy();$("#add").onclick=addMeal;$("#rec").onclick=recommend}
+ else if(tab==="wk"&&wk&&S.routine&&S.routine.plan){a.innerHTML=wkView();bindWk()}
+ else if(tab==="rut"){a.innerHTML=rutView();$("#gr").onclick=genRoutine;document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>startWk(+b.dataset.w))}
+ else if(tab==="coach"){a.innerHTML=coachView();$("#send").onclick=ask;$("#q").onkeydown=e=>{if(e.key==="Enter")ask()};window.scrollTo(0,document.body.scrollHeight)}
+ else{a.innerHTML=prog();$("#sp").onclick=addPhoto;const cp=$("#cp");if(cp)cp.onclick=compare;$("#aw").onclick=()=>{const v=+$("#nw").value;if(!v)return;S.weights.push({d:today(),v});save();render()}}
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===tab))}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;render()});
+
+async function getSample(){const s=await claude.use("sample");if(!s){alert("La IA no está disponible aquí.");return null}return s}
+function shrink(file){return new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,900/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(r,"image/jpeg",.8)};i.src=URL.createObjectURL(file)})}
+async function addMeal(){const f=$("#photo").files[0],txt=$("#txt").value.trim();if(!f&&!txt){alert("Haz una foto o escribe qué has comido");return}
+ busy=true;render();
+ try{const s=await getSample();if(!s)throw 0;const o={};
+  if(f&&(await s.limits()).images)o.images=[await shrink(f)];
+  const r=await s.json(`Estima los valores nutricionales de esta comida${f?" (mira la foto)":""}. ${txt?"Descripción: "+txt:""} Responde SOLO JSON: {"n":"nombre corto","k":kcal,"p":proteína g,"c":carbohidratos g,"f":grasas g}, números enteros.`,o);
+  S.meals.push({d:today(),n:String(r.n||txt||"Comida"),k:Math.round(r.k)||0,p:Math.round(r.p)||0,c:Math.round(r.c)||0,f:Math.round(r.f)||0});save()
+ }catch(e){if(e)alert("No se pudo analizar. Inténtalo de nuevo.")}
+ busy=false;render()}
+async function recommend(){const p=S.profile,t=targets(p),d=totals(today());busy=true;render();
+ try{const s=await getSample();if(!s)throw 0;
+  const r=await s(`Eres nutricionista deportivo. Objetivo: ${p.goal==="lose"?"perder grasa":p.goal==="gain"?"ganar músculo":"mantener"}. Dieta/alergias: ${p.diet||"ninguna"}. Meta diaria: ${t.k} kcal, ${t.p} g proteína, ${t.c} g carbos, ${t.f} g grasas. Ya consumido hoy: ${Math.round(d.k)} kcal, ${Math.round(d.p)} g P, ${Math.round(d.c)} g C, ${Math.round(d.f)} g G. Propón la próxima comida: 2 opciones breves con cantidades y macros aproximados. Español, sin introducción, máximo 80 palabras.`,{cache:false});
+  rec=r.text}catch(e){if(e)alert("No se pudo generar la recomendación.")}
+ busy=false;render()}
+function rutView(){const o=(S.routine&&S.routine.o)||{};return`<h1>Rutina</h1><div class="card">
+<div class="row"><div><label>Días/semana</label><select id="rd">${[2,3,4,5,6].map(n=>`<option ${(o.d||4)==n?"selected":""}>${n}</option>`).join("")}</select></div>
+<div><label>Lugar</label><select id="rp"><option>Gimnasio</option><option ${o.p==="Casa"?"selected":""}>Casa</option></select></div></div>
+<label>Nivel</label><select id="rl"><option>Principiante</option><option ${o.l==="Intermedio"?"selected":""}>Intermedio</option><option ${o.l==="Avanzado"?"selected":""}>Avanzado</option></select>
+<label>Qué entrenas o quieres entrenar</label><textarea id="rt" rows="3" placeholder="ej. Lunes pecho y tríceps, miércoles pierna, viernes espalda y bíceps">${esc(o.t||"")}</textarea>
+<label>Lesiones o limitaciones (opcional)</label><input id="ri" value="${esc(o.i||"")}" placeholder="rodilla, hombro…">
+<button id="gr" ${busy?"disabled":""}>${busy?"Creando…":S.routine?"Crear una nueva":"Crear mi rutina"}</button></div>
+${routineCards()}`}
+async function genRoutine(){const p=S.profile,o={d:+$("#rd").value,p:$("#rp").value,l:$("#rl").value,i:$("#ri").value,t:$("#rt").value};busy=true;S.routine=S.routine?{...S.routine,o}:{text:"",o};render();
+ try{const s=await getSample();if(!s)throw 0;
+ const r=await s(`Eres entrenador personal. Crea una rutina semanal para: ${p.sex==="m"?"hombre":"mujer"}, ${p.a} años, ${p.h} cm, ${p.w} kg, objetivo ${p.goal==="lose"?"perder grasa":p.goal==="gain"?"ganar músculo":"mantenerse"}. Nivel ${o.l}, ${o.d} días/semana, en ${o.p}. Limitaciones: ${o.i||"ninguna"}. Lo que la persona ya entrena o quiere entrenar (días y grupos musculares): ${o.t||"a tu criterio"}. Respétalo y adáptalo a esos días. Responde SOLO JSON sin markdown con este formato: {"days":[{"day":"Lunes","focus":"Pecho y tríceps","exercises":[{"name":"Press banca","sets":4,"reps":"8-10","rest":"90 s"}]}],"tips":["consejo de progresión","otro consejo"]}. Entre 4 y 7 ejercicios por día, nombres en español.`,{cache:false});
+ S.routine={plan:parseR(r.text),o};save()}catch(e){if(e)alert("No se pudo crear la rutina.")}
+ busy=false;render()}
+function parseR(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");const p=JSON.parse(t.slice(a,b+1));if(!p.days||!p.days.length)throw new Error("x");return p}
+function routineCards(){const R=S.routine,p=R&&R.plan;if(!p)return R&&R.text?`<div class="card"><div style="white-space:pre-wrap">${esc(R.text)}</div></div>`:"";
+ return p.days.map((d,i)=>`<div class="card day"><div class="dh"><div class="dn">${i+1}</div><div><b>${esc(d.day||"")}</b><div class="mu">${esc(d.focus||"")}</div></div></div><div style="padding:12px 14px 4px"><button data-w="${i}" style="margin:0">Iniciar entrenamiento</button></div>${(d.exercises||[]).map(e=>`<div class="ex"><div><b>${esc(e.name||"")}</b><div class="mu">Descanso ${esc(e.rest||"-")}</div></div><span class="chip">${esc(e.sets)} × ${esc(e.reps)}</span></div>`).join("")}</div>`).join("")+(p.tips&&p.tips.length?`<div class="card"><h2>Progresión</h2>${p.tips.map(t=>`<div class="meal"><span>— ${esc(t)}</span></div>`).join("")}</div>`:"")}
+function backupCard(){return`${accountCard()}<div class="card"><h2>Copia de seguridad</h2><div class="mu">Guarda tu progreso en un archivo para no perderlo si cambias de móvil o borras el navegador. Incluye perfil, comidas, peso, fotos, rutina y chat.</div>
+<button class="s" id="bx">Descargar copia</button>
+<label>Restaurar copia</label><input id="bf" type="file" accept=".json,application/json">
+<textarea id="bt" rows="3" placeholder="o pega aquí el contenido de la copia" style="margin-top:8px"></textarea>
+<button id="bi">Restaurar</button><button class="s" id="br" style="margin-top:24px">Borrar todos mis datos</button></div>`}
+function bindBackup(){bindAccount();const x=$("#bx");if(!x)return;
+ x.onclick=async()=>{const json=JSON.stringify(S);let d=null;try{d=await claude.use("downloads")}catch(e){}
+  if(d){try{await d.save({filename:"noboo-copia-"+today()+".json",data:new Blob([json],{type:"application/json"})});return}catch(e){if(e&&e.code==="declined")return}}
+  $("#bt").value=json;$("#bt").select();alert("No se pudo descargar. Copia el texto del recuadro y guárdalo en tus notas.")};
+ $("#bf").onchange=async e=>{const f=e.target.files[0];if(f)$("#bt").value=await f.text()};
+ $("#bi").onclick=()=>{try{const o=JSON.parse($("#bt").value);if(!o||!o.profile)throw 0;
+  if(!confirm("Esto reemplazará los datos actuales por los de la copia. ¿Continuar?"))return;
+  S=Object.assign({routine:null,chat:[],photos:[],meals:[],weights:[]},o);save();tab="hoy";render();alert("Copia restaurada")}catch(e){alert("La copia no es válida.")}};
+ $("#br").onclick=()=>{if(confirm("¿Borrar todos tus datos? No se puede deshacer.")){try{localStorage.removeItem("fc")}catch(e){}S={profile:null,meals:[],weights:[],routine:null,chat:[],photos:[]};save();rec="";cmpTxt="";wz={i:0,v:{}};tab="hoy";render()}}}
+let wz={i:0,v:{}};
+const WS=[{k:"sex",t:"¿Eres hombre o mujer?",o:[["m","Hombre"],["f","Mujer"]]},{k:"a",t:"¿Qué edad tienes?",u:"años",min:14,max:100},{k:"h",t:"¿Cuánto mides?",u:"cm",min:120,max:230},{k:"w",t:"¿Cuánto pesas?",u:"kg",min:30,max:300},{k:"goal",t:"¿Cuál es tu objetivo?",o:[["lose","Perder grasa"],["keep","Mantener"],["gain","Ganar músculo"]]},{k:"act",t:"¿Cuánto entrenas?",o:[[1.2,"Nada o casi nada"],[1.375,"1-3 días por semana"],[1.55,"3-5 días por semana"],[1.725,"6-7 días por semana"]]},{k:"diet",t:"¿Alergias o tipo de dieta? (opcional)",p:"vegetariano, sin lactosa…"}];
+function wizView(){const s=WS[wz.i],last=wz.i===WS.length-1;let body;
+ if(s.o)body=s.o.map(([v,l])=>`<button class="${wz.v[s.k]==v?"":"s"}" data-v="${v}">${l}</button>`).join("");
+ else body=`<div class="row" style="align-items:center"><input id="wi" ${s.k==="diet"?"":'type="number" inputmode="decimal"'} value="${esc(wz.v[s.k]||"")}" placeholder="${s.p||""}" style="font-size:26px;font-weight:700;padding:16px">${s.u?`<span class="mu" style="flex:none">${s.u}</span>`:""}</div>`;
+ return`<div class="bar" style="margin:8px 0 20px"><i style="width:${(wz.i+1)/WS.length*100}%"></i></div><div class="mu">${wz.i+1} / ${WS.length}</div><h1>${s.t}</h1>${body}${s.o?"":`<button id="nx">${last?"Empezar":"Continuar"}</button>`}${wz.i?'<button class="s" id="bk">Atrás</button>':""}`}
+function bindWiz(){document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const s=WS[wz.i];wz.v[s.k]=s.k==="act"?+b.dataset.v:b.dataset.v;wizNext()});
+ const nx=$("#nx");if(nx)nx.onclick=()=>{const s=WS[wz.i],v=$("#wi").value.trim();
+  if(s.k==="diet")wz.v.diet=v;else{const n=+v;if(!(n>=s.min&&n<=s.max)){alert("Revisa el valor: debe estar entre "+s.min+" y "+s.max);return}wz.v[s.k]=n}wizNext()};
+ const bk=$("#bk");if(bk)bk.onclick=()=>{wz.i--;render()}}
+function wizNext(){if(wz.i<WS.length-1){wz.i++;render()}else{const v=wz.v;S.profile={sex:v.sex,a:v.a,h:v.h,w:v.w,goal:v.goal,act:v.act,diet:v.diet||""};if(!S.weights.length)S.weights.push({d:today(),v:v.w});save();tab="hoy";render()}}
+let wk=null,tmr=null,lock=null;
+const cur=()=>S.routine.plan.days[wk.di];
+const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+function restSec(e){const n=parseInt(String(e.rest||"").replace(/\D/g,""));if(!n)return 60;return /min/i.test(String(e.rest))?n*60:n}
+async function getLock(){try{lock=await navigator.wakeLock.request("screen")}catch(e){}}
+function releaseLock(){try{lock&&lock.release()}catch(e){}lock=null}
+function beep(){try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch(e){}try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();c.close()},350)}catch(e){}}
+function startWk(i){wk={di:i,ei:0,si:1,rest:0,end:0,done:false};getLock();tab="wk";render();window.scrollTo(0,0)}
+function tick(){wk.rest=Math.max(0,Math.ceil((wk.end-Date.now())/1000));const t=$("#tm");if(wk.rest<=0){clearInterval(tmr);beep();render()}else if(t)t.textContent=fmt(wk.rest)}
+function startTimer(){clearInterval(tmr);tmr=setInterval(tick,500)}
+function endWk(){clearInterval(tmr);releaseLock();wk=null;tab="rut";render()}
+function setDone(){const ex=cur().exercises,e=ex[wk.ei],ns=+e.sets||1;
+ if(wk.si>=ns&&wk.ei>=ex.length-1){clearInterval(tmr);wk.done=true;(S.workouts=S.workouts||[]).push({d:today(),day:cur().day,focus:cur().focus});save();beep();render();return}
+ const sec=restSec(e);if(wk.si<ns)wk.si++;else{wk.ei++;wk.si=1}
+ wk.end=Date.now()+sec*1000;wk.rest=sec;render();startTimer()}
+function wkView(){const d=cur(),ex=d.exercises||[],e=ex[wk.ei];
+ if(wk.done)return`<h1>¡Entrenamiento completado!</h1><div class="card"><div class="big">${ex.length}</div><div class="mu">ejercicios · ${esc(d.day||"")} · ${esc(d.focus||"")}</div><div class="meal"><span>Entrenos completados</span><b>${S.workouts.length}</b></div></div><button id="wend">Volver a la rutina</button>`;
+ const tot=ex.reduce((a,x)=>a+(+x.sets||1),0),dn=ex.slice(0,wk.ei).reduce((a,x)=>a+(+x.sets||1),0)+wk.si-1;
+ const bar=`<div class="bar" style="margin:8px 0 16px"><i style="width:${dn/tot*100}%"></i></div>`;
+ const list=`<div class="card" style="margin-top:16px"><h2>Ejercicios</h2>${ex.map((x,i)=>`<div class="meal" style="${i<wk.ei?"opacity:.4;text-decoration:line-through":i===wk.ei?"font-weight:700":"color:var(--mu)"}"><span>${esc(x.name)}</span><span>${esc(x.sets)}×${esc(x.reps)}</span></div>`).join("")}</div>`;
+ if(wk.rest>0)return`${bar}<div class="mu">Descanso</div><div class="big" id="tm" style="font-size:96px;text-align:center;margin:28px 0">${fmt(wk.rest)}</div><div class="mu" style="text-align:center;margin-bottom:20px">Siguiente: ${esc(e.name)} · serie ${wk.si} de ${+e.sets||1}</div><div class="row"><button class="s" id="m15">+15 s</button><button id="skip">Saltar</button></div>${list}`;
+ return`${bar}<div class="mu">${esc(d.day||"")} · ${esc(d.focus||"")} · Ejercicio ${wk.ei+1}/${ex.length}</div><h1>${esc(e.name)}</h1><div class="card"><h2>Serie</h2><div class="big">${wk.si} / ${+e.sets||1}</div><div class="mu" style="margin-top:6px">${esc(e.reps)} repeticiones · descanso ${esc(e.rest||"60 s")}</div></div><button id="sd">Serie terminada</button><button class="s" id="wq">Salir</button>${list}`}
+function bindWk(){const g=s=>$(s);
+ if(g("#sd"))g("#sd").onclick=setDone;
+ if(g("#wq"))g("#wq").onclick=()=>{if(confirm("¿Salir del entrenamiento?"))endWk()};
+ if(g("#m15"))g("#m15").onclick=()=>{wk.end+=15000;tick()};
+ if(g("#skip"))g("#skip").onclick=()=>{clearInterval(tmr);wk.rest=0;render()};
+ if(g("#wend"))g("#wend").onclick=endWk}
+function coachView(){return`<h1>Coach IA</h1><div class="card"><div class="mu">Pregúntame sobre dieta, entrenamiento o suplementos. No sustituyo a un médico.</div>
+${S.chat.map(m=>`<div class="msg ${m.r==="u"?"u":""}">${esc(m.t)}</div>`).join("")}${busy?'<div class="msg">Pensando…</div>':""}
+<div class="row" style="margin-top:10px"><input id="q" placeholder="Escribe tu duda…" style="flex:3"><button id="send" style="flex:1;margin:0" ${busy?"disabled":""}>Enviar</button></div></div>`}
+async function ask(){const q=$("#q").value.trim();if(!q||busy)return;S.chat.push({r:"u",t:q});S.chat=S.chat.slice(-20);busy=true;render();
+ try{const s=await getSample(),p=S.profile;if(!s)throw 0;
+ const hist=S.chat.slice(0,-1).slice(-6).map(m=>(m.r==="u"?"Usuario: ":"Coach: ")+m.t).join("\n");
+ const r=await s(`Eres un coach de nutrición y gimnasio. Perfil: ${p.sex==="m"?"hombre":"mujer"}, ${p.a} años, ${p.h} cm, ${p.w} kg, objetivo ${p.goal}, dieta: ${p.diet||"ninguna"}. Responde claro y breve (máx 120 palabras) en español. Si es un tema médico, recomienda ver a un profesional.\n${hist}\nUsuario: ${q}`,{cache:false});
+ S.chat.push({r:"c",t:r.text});save()}catch(e){if(e)S.chat.push({r:"c",t:"No pude responder, inténtalo de nuevo."})}
+ busy=false;render()}
+function photoCard(){const P=S.photos;let g="";
+ if(P.length){const a=P[0],b=P[P.length-1];g=`<div class="row" style="margin:10px 0"><div><img src="${a.img}" style="width:100%;border-radius:10px"><div class="mu">Inicio · ${a.d}</div></div>${P.length>1?`<div><img src="${b.img}" style="width:100%;border-radius:10px"><div class="mu">Actual · ${b.d}</div></div>`:""}</div>`}
+ return`<div class="card"><h2>Fotos de progreso</h2><input id="pf" type="file" accept="image/*"><button class="s" id="sp" ${busy?"disabled":""}>Guardar foto de hoy</button>${g}
+${P.length>1?`<button id="cp" ${busy?"disabled":""}>${busy?"Comparando…":"Comparar con IA"}</button>`:""}${cmpTxt?`<div class="rec">${esc(cmpTxt)}</div>`:""}</div>`}
+function small(f){return new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,480/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.65))};i.src=URL.createObjectURL(f)})}
+async function addPhoto(){const f=$("#pf").files[0];if(!f){alert("Elige una foto");return}
+ S.photos.push({d:today(),img:await small(f)});if(S.photos.length>12)S.photos.splice(1,1);
+ save();
+ cmpTxt="";render()}
+function toBlob(u){const b=atob(u.split(",")[1]),n=new Uint8Array(b.length);for(let i=0;i<b.length;i++)n[i]=b.charCodeAt(i);return new Blob([n],{type:"image/jpeg"})}
+async function compare(){const P=S.photos;busy=true;render();
+ try{const s=await getSample();if(!s)throw 0;
+ if(!(await s.limits()).images){alert("Las imágenes no están disponibles.");throw 0}
+ const r=await s("Te paso dos fotos de progreso físico: la primera es el inicio y la segunda la actual. Describe los cambios visibles de forma objetiva y alentadora, sin juzgar el cuerpo, y da 2 consejos para seguir. Si la luz o la pose son distintas, avísalo. Español, máximo 90 palabras.",{images:[toBlob(P[0].img),toBlob(P[P.length-1].img)],cache:false});
+ cmpTxt=r.text}catch(e){if(e)alert("No se pudo comparar.")}
+ busy=false;render()}
+
+/* ===== CUENTAS, SUSCRIPCIÓN E IA (servidor propio) ===== */
+const SUPA_URL="PEGA_AQUI_TU_SUPABASE_URL",SUPA_KEY="PEGA_AQUI_TU_ANON_KEY",PRICE="4,99 €/mes";
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let user=null,subOk=false,gate="load",authMode="up",syncT=null;
+const DEF=()=>({profile:null,meals:[],weights:[],routine:null,chat:[],photos:[],workouts:[]});
+const msg=t=>{const m=$("#ms");if(m)m.textContent=t};
+const token=async()=>{const {data}=await sb.auth.getSession();return data.session&&data.session.access_token};
+function cloud(){if(!user||gate)return;clearTimeout(syncT);syncT=setTimeout(()=>{sb.from("user_data").upsert({user_id:user.id,data:S,updated_at:new Date().toISOString()}).then(()=>{})},1200)}
+async function loadCloud(){const {data}=await sb.from("user_data").select("data").eq("user_id",user.id).maybeSingle();
+ if(data&&data.data&&data.data.profile){S=Object.assign(DEF(),data.data);try{localStorage.setItem("fc",JSON.stringify(S))}catch(e){}}
+ else{await sb.from("user_data").upsert({user_id:user.id,data:S})}}
+async function checkSub(){const {data}=await sb.from("subscriptions").select("status").eq("user_id",user.id).maybeSingle();subOk=!!data&&["active","trialing"].includes(data.status)}
+async function enter(){gate="load";render();await loadCloud();
+ let n=location.search.includes("paid=1")?8:1;while(n--){await checkSub();if(subOk)break;if(n)await new Promise(r=>setTimeout(r,1500))}
+ if(location.search)history.replaceState(null,"",location.pathname);
+ gate=subOk?null:"paywall";tab="hoy";render()}
+async function api(path){const r=await fetch(path,{method:"POST",headers:{Authorization:"Bearer "+await token()}});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Error");return j}
+async function logout(){await sb.auth.signOut();try{localStorage.removeItem("fc")}catch(e){}S=DEF();user=null;subOk=false;gate="auth";render()}
+function gateView(){
+ if(gate==="load")return`<div class="mu" style="margin-top:40vh;text-align:center">Cargando…</div>`;
+ if(gate==="paywall")return`<h1>Empieza tu prueba gratis</h1><div class="card"><div class="big">7 días</div><div class="mu">gratis, después ${PRICE}. Cancela cuando quieras.</div>${["Análisis de comidas con foto","Rutinas personalizadas","Coach IA","Progreso y fotos"].map(t=>`<div class="meal"><span>${t}</span></div>`).join("")}</div><button id="pay">Empezar prueba gratis</button><button class="s" id="lo">Cerrar sesión</button><div class="mu" id="ms" style="margin-top:12px"></div>`;
+ const up=authMode==="up";
+ return`<h1>${up?"Crea tu cuenta":"Entra a tu cuenta"}</h1><div class="card"><label>Correo</label><input id="em" type="email" autocomplete="email"><label>Contraseña</label><input id="pw" type="password" autocomplete="${up?"new-password":"current-password"}"><button id="au">${up?"Crear cuenta":"Entrar"}</button><button class="s" id="sw">${up?"Ya tengo cuenta":"Crear cuenta nueva"}</button>${up?"":'<div class="mu" style="margin-top:14px;text-align:center"><a href="#" id="fg" style="color:inherit">Olvidé mi contraseña</a></div>'}<div class="mu" id="ms" style="margin-top:12px"></div></div>`}
+function bindGate(){
+ if(gate==="paywall"){$("#pay").onclick=async()=>{msg("Abriendo el pago…");try{location.href=(await api("/api/checkout")).url}catch(e){msg("No se pudo abrir el pago.")}};$("#lo").onclick=logout}
+ if(gate==="auth"){
+  $("#sw").onclick=()=>{authMode=authMode==="up"?"in":"up";render()};
+  $("#au").onclick=async()=>{const email=$("#em").value.trim(),pw=$("#pw").value;
+   if(!email||pw.length<6){msg("Escribe tu correo y una contraseña de al menos 6 caracteres.");return}
+   msg("Un momento…");
+   if(authMode==="up"){const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.origin}});
+    if(error)return msg(error.message);
+    if(!data.session)return msg("Te hemos enviado un correo. Confírmalo y vuelve para entrar.");
+    user=data.user;await enter()}
+   else{const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+    if(error)return msg("Correo o contraseña incorrectos.");user=data.user;await enter()}};
+  const fg=$("#fg");if(fg)fg.onclick=async e=>{e.preventDefault();const email=$("#em").value.trim();if(!email)return msg("Escribe tu correo arriba.");
+   await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});msg("Si el correo existe, recibirás un enlace.")}}}
+function accountCard(){return`<div class="card"><h2>Cuenta</h2><div class="mu">${esc(user?user.email:"")}</div><button class="s" id="ps">Gestionar suscripción</button><button class="s" id="lo2">Cerrar sesión</button></div>`}
+function bindAccount(){const p=$("#ps"),l=$("#lo2");
+ if(p)p.onclick=async()=>{try{location.href=(await api("/api/portal")).url}catch(e){alert("No se pudo abrir la gestión de la suscripción.")}};
+ if(l)l.onclick=logout}
+/* Puente: el resto de la app usa claude.use("sample") y claude.use("downloads") */
+const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(",")[1]);f.readAsDataURL(b)});
+async function aiCall(prompt,images){const imgs=[];for(const b of images||[])imgs.push({media_type:b.type||"image/jpeg",data:await b64(b)});
+ const r=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+await token()},body:JSON.stringify({prompt,images:imgs})});
+ const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Error");return j}
+const sampleShim=Object.assign(async(p,o={})=>aiCall(p,o.images),{
+ json:async(p,o={})=>{const t=(await aiCall(p,o.images)).text,a=t.indexOf("{"),z=t.lastIndexOf("}");return JSON.parse(t.slice(a,z+1))},
+ limits:async()=>({images:true})});
+window.claude={use:async n=>n==="sample"?sampleShim:n==="downloads"?{save:async({filename,data})=>{const a=document.createElement("a");a.href=URL.createObjectURL(data);a.download=filename;a.click()}}:null};
+sb.auth.onAuthStateChange(async ev=>{if(ev==="PASSWORD_RECOVERY"){const p=prompt("Escribe tu nueva contraseña (mínimo 6 caracteres)");if(p&&p.length>=6)await sb.auth.updateUser({password:p})}});
+(async()=>{const {data}=await sb.auth.getSession();if(data.session){user=data.session.user;await enter()}else{gate="auth";render()}})();
+</script></body></html>
