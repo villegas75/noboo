@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>noboo · administración</title>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#000;--card:#0a0a0a;--tx:#fafafa;--mu:#a3a3a3;--bd:#262626;--ok:#4ade80;--no:#f87171}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:500}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:30px;font-weight:700;letter-spacing:-.03em;margin:8px 0 4px}
+h2{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin:22px 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:14px;margin-bottom:10px}
+input{width:100%;padding:12px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button{font:inherit;font-weight:600;border:0;border-radius:6px;padding:10px 12px;background:var(--tx);color:#000;cursor:pointer}
+button.s{background:none;color:var(--tx);border:1px solid var(--tx)}button.d{background:none;color:var(--no);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input{flex:1;min-width:180px}
+.mu{color:var(--mu);font-size:13px}.pill{display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;border:1px solid}
+.ok{color:var(--ok);border-color:var(--ok)}.no{color:var(--no);border-color:var(--no)}.nt{color:var(--mu);border-color:var(--bd)}
+.u{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.u>div:first-child{min-width:0;flex:1}.u b{word-break:break-all}
+.stats{display:flex;gap:10px}.stats .card{flex:1;text-align:center;margin:0}.stats b{font-size:28px;display:block}
+</style></head><body><main id="app"></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const {SUPA_URL,SUPA_KEY}=window.NOBOO_CONFIG||{};
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let D=null,q="",err="";
+async function call(body){const {data}=await sb.auth.getSession();const t=data.session&&data.session.access_token;
+ const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+t},body:JSON.stringify(body)});
+ const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Error");return j}
+async function load(){try{D=await call({action:"list"});err=""}catch(e){D=null;err=e.message}render()}
+async function setRule(email,mode,note){try{await call({action:"set",email,mode,note});await load()}catch(e){alert(e.message)}}
+function login(){return`<h1>Administración</h1><div class="mu">Entra con tu cuenta de administrador.</div><div class="card" style="margin-top:16px"><div class="row"><input id="em" type="email" placeholder="Correo"></div><div class="row" style="margin-top:8px"><input id="pw" type="password" placeholder="Contraseña"></div><div class="row" style="margin-top:10px"><button id="go">Entrar</button></div><div class="mu" id="ms" style="margin-top:8px"></div></div>`}
+function badge(u){if(u.rule==="deny")return'<span class="pill no">Bloqueado</span>';if(u.rule==="allow")return'<span class="pill ok">Acceso concedido</span>';if(u.access)return'<span class="pill ok">Suscrito</span>';return'<span class="pill nt">Sin acceso</span>'}
+function panel(){const us=D.users.filter(u=>(u.email||"").toLowerCase().includes(q.toLowerCase()));
+ const n=D.users.length,withA=D.users.filter(u=>u.access).length;
+ return`<div class="row" style="justify-content:space-between"><h1>Administración</h1><button class="s" id="out">Salir</button></div>
+<div class="mu">Modo: <b style="color:var(--tx)">${D.mode==="invite"?"solo por invitación":"suscripción o invitación"}</b> · para cambiarlo, edita la variable ACCESS_MODE en Vercel.</div>
+<div class="stats" style="margin-top:16px"><div class="card"><b>${n}</b><span class="mu">cuentas</span></div><div class="card"><b>${withA}</b><span class="mu">con acceso</span></div><div class="card"><b>${D.pending.length}</b><span class="mu">invitados sin registrar</span></div></div>
+<h2>Dar acceso por correo</h2><div class="card"><div class="row"><input id="ne" type="email" placeholder="correo@ejemplo.com"><button id="ad">Dar acceso</button></div><div class="mu" style="margin-top:8px">Funciona aunque todavía no se haya registrado: cuando cree su cuenta con ese correo y lo confirme, entrará.</div></div>
+${D.pending.length?`<h2>Invitados sin registrar</h2>${D.pending.map(p=>`<div class="card u"><div><b>${esc(p.email)}</b><div class="mu">${p.rule==="deny"?"Bloqueado":"Acceso concedido"}</div></div><button class="s" data-r="${esc(p.email)}">Quitar</button></div>`).join("")}`:""}
+<h2>Cuentas</h2><input id="sq" placeholder="Buscar por correo" value="${esc(q)}" style="margin-bottom:10px">
+${us.length?us.map(u=>`<div class="card u"><div><b>${esc(u.email)}</b> ${badge(u)}<div class="mu">Alta ${(u.created||"").slice(0,10)} · último acceso ${(u.last||"nunca").slice(0,10)}${u.confirmed?"":" · correo sin confirmar"}</div></div><div class="row">${u.rule==="allow"?"":`<button data-a="${esc(u.email)}">Dar acceso</button>`}${u.rule==="deny"?"":`<button class="d" data-b="${esc(u.email)}">Bloquear</button>`}${u.rule?`<button class="s" data-r="${esc(u.email)}">Quitar regla</button>`:""}</div></div>`).join(""):'<div class="mu">No hay cuentas.</div>'}
+<div class="mu" style="margin-top:16px;font-size:12px">Bloquear no cancela pagos de Stripe: si esa persona paga, cancela su suscripción desde tu panel de Stripe.</div>`}
+function render(){const a=$("#app");
+ if(!D){a.innerHTML=(err&&err!=="No autorizado"?`<div class="mu">${esc(err)}</div>`:"")+login()+(err==="No autorizado"?'<div class="mu" style="margin-top:12px">Esta cuenta no es de administrador (revisa ADMIN_EMAILS en Vercel y que hayas confirmado tu correo).</div>':"");
+  $("#go").onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$("#em").value.trim(),password:$("#pw").value});if(error){$("#ms").textContent="Correo o contraseña incorrectos.";return}await load()};return}
+ a.innerHTML=panel();
+ $("#out").onclick=async()=>{await sb.auth.signOut();D=null;render()};
+ $("#ad").onclick=()=>{const e=$("#ne").value.trim();if(e)setRule(e,"allow","")};
+ $("#sq").oninput=e=>{q=e.target.value;const p=e.target.selectionStart;render();const s=$("#sq");s.focus();s.setSelectionRange(p,p)};
+ document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>setRule(b.dataset.a,"allow",""));
+ document.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{if(confirm("¿Bloquear a "+b.dataset.b+"?"))setRule(b.dataset.b,"deny","")});
+ document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>setRule(b.dataset.r,"none",""))}
+(async()=>{const {data}=await sb.auth.getSession();if(data.session)await load();else render()})();
+</script></body></html>
